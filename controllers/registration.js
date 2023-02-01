@@ -1,8 +1,10 @@
 const User = require('../models/userModel');
-const { validEmail, validLength, validPassword } = require('../validations/userValidation');
+const { validEmail, validLength, validPassword, generateUsername } = require('../validations/userValidation');
+const bcrypt = require('bcrypt');
+
 const registration = async (req, res) => {
     try {
-        const { fName, lName, userName, email, password, birthDate, birthMonth, birthYear, gender, varified } = req.body;
+        const { fName, lName, email, password, birthDate, birthMonth, birthYear, gender, varified } = req.body;
 
         //name validation
         if (!validLength(fName, 2, 8) || !validLength(lName, 2, 8)) {
@@ -10,6 +12,7 @@ const registration = async (req, res) => {
                 errMessage: 'Name length should be two to eight characters!'
             })
         }
+
         //email validation
         if (!validEmail(email)) {
             return res.status(401).json({
@@ -30,12 +33,21 @@ const registration = async (req, res) => {
             })
         }
 
+
+        //hash password
+        const hashedPass = await bcrypt.hash(password, 10);
+
+        //generate uniq username
+        let fullname = fName + lName;
+        let uniqUserName = await generateUsername(fullname);
+        console.log(uniqUserName);
+        return
         const user = await new User({
             fName,
             lName,
-            userName,
+            userName: uniqUserName,
             email,
-            password,
+            password: hashedPass,
             birthDate,
             birthMonth,
             birthYear,

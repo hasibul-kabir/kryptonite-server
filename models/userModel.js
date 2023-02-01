@@ -23,7 +23,7 @@ const userModel = mongoose.Schema({
     },
     email: {
         type: String,
-        require: true,
+        required: true,
         trim: true,
         text: true
     },
